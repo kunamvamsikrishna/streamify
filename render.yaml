@@ -25,15 +25,13 @@ services:
   # Frontend Service
   - type: web
     name: streamify-frontend
-    env: static
+    env: node
     plan: free
     buildCommand: cd FRONTEND && npm install && npm run build
-    staticPublishPath: ./FRONTEND/dist
-    routes:
-      - type: rewrite
-        source: /*
-        destination: /index.html
+    startCommand: cd FRONTEND && npm start
     envVars:
+      - key: NODE_ENV
+        value: production
       - key: VITE_API_URL
         sync: false
       - key: VITE_STREAM_API_KEY
