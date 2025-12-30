@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router";
+import { useParams, useNavigate } from "react-router";
 import useAuthUser from "../hooks/useauth.js";
 import { useQuery } from "@tanstack/react-query";
 import { getStreamToken } from "../lib/api.js";
@@ -23,6 +23,7 @@ const STREAM_API_KEY = import.meta.env.VITE_STREAM_API_KEY;
 
 const ChatPage = () => {
   const { id: targetUserId } = useParams();
+  const navigate = useNavigate();
 
   const [chatClient, setChatClient] = useState(null);
   const [channel, setChannel] = useState(null);
@@ -89,16 +90,16 @@ const ChatPage = () => {
 
   const handleVideoCall = () => {
     if (channel) {
-      const callUrl = `${window.location.origin}/call/${channel.id}`;
+      const callUrl = `/call/${channel.id}`;
 
       channel.sendMessage({
-        text: `I've started a video call. Join me here: ${callUrl}`,
+        text: `I've started a video call. Join me here: ${window.location.origin}${callUrl}`,
       });
 
-      // Navigate to the call page
-      window.open(callUrl, '_blank');
+      // Navigate to the call page in same window
+      navigate(callUrl);
       
-      toast.success("Video call started!");
+      toast.success("Joining video call...");
     }
   };
 
