@@ -26,8 +26,16 @@ import Chatroutes from "./routes/chat.js"
 import { connectdb } from "./lib/db.js";
 import cookieParser from "cookie-parser"
 
+console.log("=== Server Initialization ===")
+console.log(`Node version: ${process.version}`)
+console.log(`Working directory: ${process.cwd()}`)
+console.log(`File location: ${__filename}`)
+
 const app = express()
 const PORT = process.env.PORT || 5001
+
+console.log(`Port: ${PORT}`)
+console.log(`Environment: ${process.env.NODE_ENV || 'development'}`)
 
 // Health check endpoint
 app.get("/health", (req, res) => {
@@ -61,49 +69,97 @@ app.use((err, req, res, next) => {
 
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (reason, promise) => {
-    console.error('Unhandled Rejection at:', promise, 'reason:', reason)
+    console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason)
     // Don't exit the process, just log it
 })
 
 // Handle uncaught exceptions
 process.on('uncaughtException', (error) => {
-    console.error('Uncaught Exception:', error)
+    console.error('❌ Uncaught Exception:', error)
+    console.error('❌ Stack:', error.stack)
     // Exit gracefully
     process.exit(1)
 })
 
-// Start server
-const server = app.listen(PORT, async () => {
-    console.log(`Server starting on port ${PORT}`)
-    console.log(`Environment: ${process.env.NODE_ENV || 'development'}`)
+// Check required environment variables BEFORE starting server
+const requiredEnvVars = ['MONGO_URI', 'SECRET_KEY', 'STREAM_API_KEY', 'STREAM_SECRET_KEY']
+const missingVars = requiredEnvVars.filter(varName => !process.env[varName])
+
+if (missingVars.length > 0) {
+    console.error(`❌ Missing required environment variables: ${missingVars.join(', ')}`)
+    console.error("Please set these variables in your Render dashboard")
+    // Continue anyway - let the server start so we can see what happens
+} else {
+    console.log("✅ All required environment variables are set")
+}
+
+// Start the server
+let server
+try {
+    console.log("🚀 Starting server...")
+    server = app.listen(PORT, () => {
+        console.log(`✅ Server is listening on port ${PORT}`)
+        console.log(`✅ Health check available at: http://localhost:${PORT}/health`)
+        
+        // Connect to database (non-blocking)
+        connectdb()
+            .then(() => {
+                console.log("✅ Database connection successful")
+                console.log("✅ Server is fully ready!")
+            })
+            .catch((error) => {
+                console.error("❌ Failed to connect to database:", error.message)
+                console.error("⚠️  Server is running but database connection failed")
+                console.error("⚠️  Some features may not work until database is connected")
+            })
+    })
     
-    // Check required environment variables
-    const requiredEnvVars = ['MONGO_URI', 'SECRET_KEY', 'STREAM_API_KEY', 'STREAM_SECRET_KEY']
-    const missingVars = requiredEnvVars.filter(varName => !process.env[varName])
+    // Handle server errors
+    server.on('error', (error) => {
+        console.error("❌ Server error occurred:", error.message)
+        if (error.code === 'EADDRINUSE') {
+            console.error(`❌ Port ${PORT} is already in use`)
+        } else {
+            console.error('❌ Server error details:', error)
+        }
+        process.exit(1)
+    })
     
-    if (missingVars.length > 0) {
-        console.error(`Missing required environment variables: ${missingVars.join(', ')}`)
-        console.error("Please set these variables in your Render dashboard")
-        // Don't exit, let it try to connect and fail gracefully
-    }
+    // Keep the process alive
+    server.on('listening', () => {
+        console.log("✅ Server event: listening")
+    })
     
-    // Connect to database
-    try {
-        await connectdb()
-        console.log("Server is ready!")
-    } catch (error) {
-        console.error("Failed to connect to database:", error.message)
-        console.error("Server is running but database connection failed")
-        // Don't exit - let the server run so we can see the error
+    server.on('close', () => {
+        console.log("⚠️  Server event: closed")
+    })
+    
+} catch (error) {
+    console.error("❌ Failed to start server:", error)
+    console.error("❌ Error details:", error.message)
+    console.error("❌ Stack:", error.stack)
+    process.exit(1)
+}
+
+// Keep process alive
+process.on('SIGTERM', () => {
+    console.log('SIGTERM received, shutting down gracefully')
+    if (server) {
+        server.close(() => {
+            console.log('Process terminated')
+            process.exit(0)
+        })
     }
 })
 
-// Handle server errors
-server.on('error', (error) => {
-    if (error.code === 'EADDRINUSE') {
-        console.error(`Port ${PORT} is already in use`)
-    } else {
-        console.error('Server error:', error)
+process.on('SIGINT', () => {
+    console.log('SIGINT received, shutting down gracefully')
+    if (server) {
+        server.close(() => {
+            console.log('Process terminated')
+            process.exit(0)
+        })
     }
-    process.exit(1)
 })
+
+console.log("=== Server initialization script completed ===")

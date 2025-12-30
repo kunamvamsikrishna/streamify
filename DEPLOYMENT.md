@@ -19,9 +19,11 @@ This guide will help you deploy Streamify to Render.
    - **Environment**: `Node`
    - **Region**: Choose closest to your users
    - **Branch**: `main`
-   - **Root Directory**: `BACKEND`
-   - **Build Command**: `npm install`
-   - **Start Command**: `npm start`
+   - **Root Directory**: `BACKEND` ⚠️ **IMPORTANT: Must be set to `BACKEND`**
+   - **Build Command**: `npm install` ⚠️ **Make sure it's `npm install`, NOT `yarn`**
+   - **Start Command**: `npm start` ⚠️ **Must be `npm start`**
+   
+   **⚠️ CRITICAL**: If you see "Running build command 'yarn'..." in logs, go to Settings → Build & Deploy and change Build Command to `npm install`
 
 5. Add Environment Variables:
    - `NODE_ENV` = `production`
