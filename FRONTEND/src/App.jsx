@@ -14,14 +14,16 @@ import { useState } from "react";
 import {usetheme} from "./store/usetheme.js"
 
 export default function App() {
-  const { isLoading, authUser } = useAuthUser();
+  const { isLoading, authUser, error } = useAuthUser();
   const {theme} = usetheme();
-  // const [authuser,setauthuser] = useState(auth1user)
   const isAuthenticated = Boolean(authUser);
   const isonboarded = authUser?.isonboarded;
-  console.log("authUser", authUser);
+  
+  console.log("App State:", { isLoading, authUser, error, isAuthenticated, isonboarded });
+  console.log("API URL:", import.meta.env.VITE_API_URL || "http://localhost:5001/api");
 
-  if (isLoading) return <PageLoader />;
+  // Show loader only if actually loading (not if there's an error)
+  if (isLoading && !error) return <PageLoader />;
   return (
     <>
       <div className="h-screen" data-theme={theme}>
