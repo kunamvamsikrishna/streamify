@@ -46,11 +46,31 @@ app.get("/health", (req, res) => {
     })
 })
 
+// CORS configuration with detailed logging
+const allowedOrigins = process.env.FRONTEND_URL 
+    ? process.env.FRONTEND_URL.split(",").map(url => url.trim())
+    : ["http://localhost:5173", "http://localhost:5174"];
+
+console.log("🌐 CORS Configuration:")
+console.log("Allowed Origins:", allowedOrigins)
+console.log("Frontend URL env var:", process.env.FRONTEND_URL || "NOT SET")
+
 app.use(cors({
-    origin: process.env.FRONTEND_URL 
-        ? process.env.FRONTEND_URL.split(",") 
-        : ["http://localhost:5173","http://localhost:5174"],
-    credentials:true,
+    origin: function (origin, callback) {
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
+        
+        if (allowedOrigins.indexOf(origin) !== -1 || allowedOrigins.includes('*')) {
+            callback(null, true);
+        } else {
+            console.warn(`❌ CORS blocked request from origin: ${origin}`)
+            console.warn(`   Allowed origins are: ${allowedOrigins.join(', ')}`)
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
 }))
 app.use(express.json())
 app.use(cookieParser())

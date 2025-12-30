@@ -50,8 +50,13 @@ This guide will help you deploy Streamify to Render.
    - **Publish Directory**: `dist`
 
 4. Add Environment Variables:
-   - `VITE_API_URL` = `https://streamify-backend.onrender.com/api` (your backend URL)
+   - `VITE_API_URL` = `https://streamify-backend.onrender.com/api` ⚠️ **CRITICAL: MUST end with /api**
    - `VITE_STREAM_API_KEY` = Your Stream.io API key
+   
+   **⚠️ IMPORTANT**: The `VITE_API_URL` MUST include `/api` at the end!
+   - ✅ CORRECT: `https://streamify-1-ltde.onrender.com/api`
+   - ❌ WRONG: `https://streamify-1-ltde.onrender.com`
+   - ❌ WRONG: `https://streamify-1-ltde.onrender.com/`
 
 5. Click **"Create Static Site"**
 
@@ -91,6 +96,17 @@ This guide will help you deploy Streamify to Render.
 - **Port issues**: Render automatically sets `PORT`, don't hardcode it
 
 ### Frontend Issues
+
+- **404 Error on API calls (e.g., `/login 404 Not Found`)**:
+  - ⚠️ **MOST COMMON ISSUE**: `VITE_API_URL` is missing `/api` at the end
+  - **Symptom**: Browser console shows `GET https://your-backend.onrender.com/login 404`
+  - **Solution**: 
+    1. Go to Render dashboard → Frontend service → Environment
+    2. Update `VITE_API_URL` to include `/api`: `https://your-backend.onrender.com/api`
+    3. Save and trigger a **Manual Deploy** → **Deploy latest commit**
+  - **Example**: If your backend is `https://streamify-1-ltde.onrender.com`, set:
+    - ✅ `VITE_API_URL=https://streamify-1-ltde.onrender.com/api`
+    - ❌ NOT `https://streamify-1-ltde.onrender.com`
 
 - **API calls fail**: 
   - Verify `VITE_API_URL` is set correctly
