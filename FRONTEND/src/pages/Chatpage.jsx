@@ -95,7 +95,10 @@ const ChatPage = () => {
         text: `I've started a video call. Join me here: ${callUrl}`,
       });
 
-      toast.success("Video call link sent successfully!");
+      // Navigate to the call page
+      window.open(callUrl, '_blank');
+      
+      toast.success("Video call started!");
     }
   };
 

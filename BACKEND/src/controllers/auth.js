@@ -88,7 +88,11 @@ export async function login(req,res){
 }
 
 export function logout(req,res){
-    res.clearCookie("jwt")
+    res.clearCookie("jwt", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax"
+    })
     return res.status(200).json({success:true,msg:"logout successful"})
 }
 

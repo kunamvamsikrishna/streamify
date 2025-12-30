@@ -50,15 +50,14 @@ const Navbar = () => {
           {/* TODO */}
           <ThemeSelector />
         
-          <div className="avatar">
-          <p>{authUser.fullname}</p>
-            <div className="w-9 rounded-full">
-           
-              <img src={authUser?.profilepic} alt="User Avatar" rel="noreferrer" />
-          
+          <div className="flex items-center gap-2">
+            <p className="text-sm font-medium hidden sm:block">{authUser?.fullname}</p>
+            <div className="avatar">
+              <div className="w-9 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
+                <img src={authUser?.profilepic} alt="User Avatar" />
+              </div>
             </div>
           </div>
-          {/* <p>{authUser?.email}</p> */}
           {/* Logout button */}
           <button
             className="btn btn-ghost btn-circle"
