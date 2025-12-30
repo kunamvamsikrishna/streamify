@@ -21,9 +21,10 @@ export default function App() {
   
   console.log("App State:", { isLoading, authUser, error, isAuthenticated, isonboarded });
   console.log("API URL:", import.meta.env.VITE_API_URL || "http://localhost:5001/api");
+  console.log("Current path:", window.location.pathname);
 
-  // Show loader only if actually loading (not if there's an error)
-  if (isLoading && !error) return <PageLoader />;
+  // Show loader while checking authentication
+  if (isLoading) return <PageLoader />;
   return (
     <>
       <div className="h-screen" data-theme={theme}>
@@ -107,6 +108,26 @@ export default function App() {
               ) : (
                 <Navigate to="/login" />
               )
+            }
+          />
+          {/* Catch-all route for debugging */}
+          <Route
+            path="*"
+            element={
+              <div className="min-h-screen flex items-center justify-center bg-base-100">
+                <div className="text-center">
+                  <h1 className="text-4xl font-bold mb-4">404 - Page Not Found</h1>
+                  <p className="mb-4">Path: {window.location.pathname}</p>
+                  <p className="mb-4">Auth Status: {isAuthenticated ? "Logged In" : "Not Logged In"}</p>
+                  <p className="mb-4">Onboarded: {isonboarded ? "Yes" : "No"}</p>
+                  <button 
+                    className="btn btn-primary"
+                    onClick={() => window.location.href = "/"}
+                  >
+                    Go Home
+                  </button>
+                </div>
+              </div>
             }
           />
         </Routes>
