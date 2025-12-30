@@ -3,10 +3,16 @@ import mongoose from "mongoose"
 
 export const connectdb = async () =>{
     try{
-        const  con = await mongoose.connect(process.env.MONGO_URI)
-        console.log(`mongodb connected ${con.connection.host}`)
+        if (!process.env.MONGO_URI) {
+            throw new Error("MONGO_URI environment variable is not set")
+        }
+        
+        const con = await mongoose.connect(process.env.MONGO_URI)
+        console.log(`MongoDB connected: ${con.connection.host}`)
+        return con
     }catch(error){
-        console.log("error while connection mongo db",  error)
-        process.exit(1)
+        console.error("Error connecting to MongoDB:", error.message)
+        // Don't exit - throw error so caller can handle it
+        throw error
     }
 }
