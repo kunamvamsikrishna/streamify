@@ -71,9 +71,22 @@ This guide will help you deploy Streamify to Render.
 
 ### Backend Issues
 
+- **Application exited early / No errors in logs**:
+  - ✅ **Fixed in latest version**: The server now has better error handling
+  - Check that all required environment variables are set:
+    - `MONGO_URI` (MongoDB connection string)
+    - `SECRET_KEY` (JWT secret)
+    - `STREAM_API_KEY` (Stream.io API key)
+    - `STREAM_SECRET_KEY` (Stream.io secret key)
+  - Check the logs for specific error messages (they should now appear)
+  - Visit `/health` endpoint to see if server is running
+  - Verify MongoDB connection string is correct and accessible
+  - Make sure MongoDB IP whitelist includes Render's IPs (or use `0.0.0.0/0`)
+
 - **Build fails**: Check that all dependencies are in `package.json`
 - **Connection refused**: Verify MongoDB connection string is correct
 - **CORS errors**: Ensure `FRONTEND_URL` matches your frontend domain exactly
+- **Port issues**: Render automatically sets `PORT`, don't hardcode it
 
 ### Frontend Issues
 
