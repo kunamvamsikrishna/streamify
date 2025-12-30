@@ -14,4 +14,6 @@ export default defineConfig({
       },
     },
   },
+  // Make sure public files are copied
+  publicDir: 'public',
 })
